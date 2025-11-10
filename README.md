@@ -8,7 +8,7 @@ A lightweight, feature-rich Kanban board Progressive Web App (PWA) designed to r
 
 ## Screenshot
 
-![iKanban Screenshot](assets/screenshot.png)
+![iKanban Screenshot](.assets/screenshot.png)
 
 ## ✨ Features
 
