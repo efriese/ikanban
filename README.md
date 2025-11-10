@@ -6,6 +6,7 @@ A lightweight, feature-rich Kanban board Progressive Web App (PWA) designed to r
 ![PWA](https://img.shields.io/badge/PWA-enabled-green.svg)
 ![No Dependencies](https://img.shields.io/badge/dependencies-none-brightgreen.svg)
 
+![Screenshot](./assets/screenshot.png)
 ## ✨ Features
 
 ### 📋 Board Management
