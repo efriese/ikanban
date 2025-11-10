@@ -59,8 +59,16 @@ const settingsBtn = document.getElementById('settingsBtn');
 const settingsModal = document.getElementById('settingsModal');
 const closeSettingsBtn = document.getElementById('closeSettingsBtn');
 const settingsBackgroundBtn = document.getElementById('settingsBackgroundBtn');
+const settingsArchiveBtn = document.getElementById('settingsArchiveBtn');
 const settingsDeleteBtn = document.getElementById('settingsDeleteBtn');
 const darkModeToggle = document.getElementById('darkModeToggle');
+
+const headerMenuBtn = document.getElementById('headerMenuBtn');
+const headerMenu = document.getElementById('headerMenu');
+const viewArchivedBtn = document.getElementById('viewArchivedBtn');
+const archivedModal = document.getElementById('archivedModal');
+const archivedBoardsList = document.getElementById('archivedBoardsList');
+const closeArchivedBtn = document.getElementById('closeArchivedBtn');
 
 // Local Storage Functions
 function saveToLocalStorage() {
@@ -133,14 +141,16 @@ function formatCardHtml(card) {
 
 // Board Functions
 function createBoard(name) {
+    const isDarkMode = document.body.classList.contains('dark-mode');
     const board = {
         id: generateId(),
         name: name,
         columns: [],
         background: {
             type: 'color',
-            value: '#f1f5f9'
-        }
+            value: isDarkMode ? '#374151' : '#f1f5f9'
+        },
+        archived: false
     };
     state.boards.push(board);
     saveToLocalStorage();
@@ -155,6 +165,30 @@ function deleteBoard(boardId) {
         saveToLocalStorage();
         updateBoardSelector();
         renderBoard();
+    }
+}
+
+function archiveBoard(boardId) {
+    if (confirm('Are you sure you want to archive this board?')) {
+        const board = state.boards.find(b => b.id === boardId);
+        if (board) {
+            board.archived = true;
+            state.currentBoardId = null;
+            saveToLocalStorage();
+            updateBoardSelector();
+            renderBoard();
+            closeSettingsModal();
+        }
+    }
+}
+
+function unarchiveBoard(boardId) {
+    const board = state.boards.find(b => b.id === boardId);
+    if (board) {
+        board.archived = false;
+        saveToLocalStorage();
+        renderArchivedBoards();
+        updateBoardSelector();
     }
 }
 
@@ -294,12 +328,43 @@ function moveCard(fromColumnId, toColumnId, cardId, targetIndex = null) {
 // Render Functions
 function updateBoardSelector() {
     boardSelector.innerHTML = '<option value="">Select Board</option>';
-    state.boards.forEach(board => {
+    state.boards.filter(board => !board.archived).forEach(board => {
         const option = document.createElement('option');
         option.value = board.id;
         option.textContent = board.name;
         boardSelector.appendChild(option);
     });
+}
+
+function renderArchivedBoards() {
+    const archivedBoards = state.boards.filter(board => board.archived);
+
+    if (archivedBoards.length === 0) {
+        archivedBoardsList.innerHTML = '<div class="archived-boards-empty">No archived boards</div>';
+        return;
+    }
+
+    archivedBoardsList.innerHTML = '';
+    archivedBoards.forEach(board => {
+        const item = document.createElement('div');
+        item.className = 'archived-board-item';
+        item.innerHTML = `
+            <div class="archived-board-name">${board.name}</div>
+            <div class="archived-board-actions">
+                <button class="btn btn-small btn-secondary" onclick="unarchiveBoard('${board.id}')">Unarchive</button>
+                <button class="btn btn-small btn-danger" onclick="deleteArchivedBoard('${board.id}')">Delete</button>
+            </div>
+        `;
+        archivedBoardsList.appendChild(item);
+    });
+}
+
+function deleteArchivedBoard(boardId) {
+    if (confirm('Are you sure you want to permanently delete this archived board?')) {
+        state.boards = state.boards.filter(b => b.id !== boardId);
+        saveToLocalStorage();
+        renderArchivedBoards();
+    }
 }
 
 function renderBoard() {
@@ -318,17 +383,29 @@ function renderBoard() {
 
     // Apply background
     const mainContent = document.querySelector('.main-content');
+    const isDarkMode = document.body.classList.contains('dark-mode');
+
     if (board.background) {
         if (board.background.type === 'color') {
-            mainContent.style.background = board.background.value;
+            // Use dark grey for default light color in dark mode
+            if (isDarkMode && board.background.value === '#f1f5f9') {
+                mainContent.style.background = '#374151';
+            } else {
+                mainContent.style.background = board.background.value;
+            }
         } else if (board.background.type === 'image' || board.background.type === 'file') {
             mainContent.style.background = `url('${board.background.value}') center/cover no-repeat`;
         }
     } else {
-        mainContent.style.background = '#f1f5f9';
+        mainContent.style.background = isDarkMode ? '#374151' : '#f1f5f9';
     }
 
     columnsContainer.innerHTML = '';
+
+    if (board.columns.length === 0) {
+        columnsContainer.innerHTML = '<div class="empty-columns-state"><h3>Let\'s Add Some Columns</h3><p>Click the "+ Add Column" button to get started</p></div>';
+        return;
+    }
 
     board.columns.forEach((column, index) => {
         const columnEl = document.createElement('div');
@@ -779,10 +856,39 @@ settingsBackgroundBtn.addEventListener('click', () => {
     openBackgroundModal();
 });
 
+settingsArchiveBtn.addEventListener('click', () => {
+    if (state.currentBoardId) {
+        archiveBoard(state.currentBoardId);
+    }
+});
+
 settingsDeleteBtn.addEventListener('click', () => {
     if (state.currentBoardId) {
         closeSettingsModal();
         deleteBoard(state.currentBoardId);
+    }
+});
+
+// Header Menu
+headerMenuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    headerMenu.style.display = headerMenu.style.display === 'none' ? 'block' : 'none';
+});
+
+viewArchivedBtn.addEventListener('click', () => {
+    headerMenu.style.display = 'none';
+    renderArchivedBoards();
+    archivedModal.style.display = 'flex';
+});
+
+closeArchivedBtn.addEventListener('click', () => {
+    archivedModal.style.display = 'none';
+});
+
+// Close header menu when clicking outside
+document.addEventListener('click', (e) => {
+    if (!headerMenuBtn.contains(e.target) && !headerMenu.contains(e.target)) {
+        headerMenu.style.display = 'none';
     }
 });
 
@@ -795,6 +901,8 @@ function toggleDarkMode(enabled) {
         document.body.classList.remove('dark-mode');
         localStorage.setItem('darkMode', 'disabled');
     }
+    // Re-render board to update background color
+    renderBoard();
 }
 
 darkModeToggle.addEventListener('change', (e) => {
@@ -910,6 +1018,8 @@ document.addEventListener('keydown', (e) => {
         closeCardModal();
         closeBackgroundModal();
         closeSettingsModal();
+        archivedModal.style.display = 'none';
+        headerMenu.style.display = 'none';
         // Close column menus
         document.querySelectorAll('.column-menu').forEach(menu => {
             menu.style.display = 'none';

@@ -20,8 +20,14 @@
                     <option value="">Select Board</option>
                 </select>
                 <button id="newBoardBtn" class="btn btn-primary">+ New Board</button>
+                <button id="headerMenuBtn" class="btn btn-icon">⋮</button>
             </div>
         </header>
+
+        <!-- Header Menu Dropdown -->
+        <div id="headerMenu" class="dropdown-menu" style="display: none;">
+            <button id="viewArchivedBtn" class="dropdown-item">📦 View Archived Boards</button>
+        </div>
 
         <!-- Main Content -->
         <main class="main-content">
@@ -156,6 +162,9 @@
                 <button id="settingsBackgroundBtn" class="settings-button">
                     🎨 Change Background
                 </button>
+                <button id="settingsArchiveBtn" class="settings-button">
+                    📦 Archive Board
+                </button>
                 <button id="settingsDeleteBtn" class="settings-button delete">
                     🗑️ Delete Board
                 </button>
@@ -163,6 +172,19 @@
 
             <div class="modal-actions">
                 <button id="closeSettingsBtn" class="btn btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Archived Boards Modal -->
+    <div id="archivedModal" class="modal">
+        <div class="modal-content">
+            <h3>Archived Boards</h3>
+            <div id="archivedBoardsList" class="archived-boards-list">
+                <!-- Archived boards will be rendered here -->
+            </div>
+            <div class="modal-actions">
+                <button id="closeArchivedBtn" class="btn btn-secondary">Close</button>
             </div>
         </div>
     </div>
