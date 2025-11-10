@@ -10,6 +10,7 @@ A lightweight, feature-rich Kanban board Progressive Web App (PWA) designed to r
 
 ### 📋 Board Management
 - **Multiple Boards** - Create and manage unlimited boards for different projects
+- **Board Archiving** - Archive boards you're not actively using (accessible via header menu)
 - **Customizable Backgrounds** - Set board backgrounds using:
   - Solid colors via color picker
   - Image URLs from the web
@@ -31,15 +32,23 @@ A lightweight, feature-rich Kanban board Progressive Web App (PWA) designed to r
     - 🟠 Orange - Due within 2 days
     - 🔴 Red - Overdue
   - **Checklists** - Add multiple checklist items with completion tracking
+- **Task Feed** - Dedicated full-page view showing all checklist items across all boards:
+  - Organized by board and card
+  - Check/uncheck tasks directly from the feed
+  - Stay focused without switching between boards
+  - Excludes archived boards automatically
 - **Drag & Drop** - Move cards between columns and reorder within columns with visual feedback
 - **Visual Badges** - Cards display due date and checklist progress at a glance
 - **Quick Actions** - Right-click any card to delete it
 
 ### 🎨 User Experience
 - **Dark Mode** - Toggle between light and dark themes with settings
+- **Task Feed View** - Click "Task Feed" button to see all checklist items in one view
+- **Board Archive System** - Archive boards via settings, view/restore via header menu
 - **Settings Panel** - Centralized ⚙ settings button for:
   - Dark mode toggle
   - Background customization
+  - Board archiving
   - Board deletion
 - **Keyboard Shortcuts**:
   - `Esc` - Close any open modal or menu
@@ -96,6 +105,16 @@ That's it! The app works fully and all features are available.
    - Pick a solid color
    - Enter an image URL
    - Upload a local image file
+4. Click **"📦 Archive Board"** to hide boards you're not actively using
+5. View archived boards via the header menu (⋮ → "📦 View Archived Boards")
+
+### Using the Task Feed
+
+1. Click **"Task Feed"** in the header (orange button)
+2. View all checklist items across all active boards
+3. Check/uncheck items directly in the feed
+4. Tasks are organized by board, then by card
+5. Select a board from the dropdown to return to board view
 
 ### Organizing Columns
 
@@ -161,8 +180,27 @@ The app automatically calculates and color-codes due dates:
 - Check/uncheck items as you complete them
 - Visual progress badge: ✓ 3/5 (completed/total)
 - Edit or delete checklist items anytime
+- View all checklist items across boards in the Task Feed
+
+### Task Feed
+
+**Centralized Task View:**
+- Click "Task Feed" button to see all checklist items
+- Full-page view with organized layout
+- Tasks grouped by board, then by card
+- Column name badges show where each task belongs
+- Check/uncheck tasks without leaving the view
+- Background-safe design works with custom board backgrounds
+- Excludes archived boards automatically
 
 ### Settings & Customization
+
+**Archive System:**
+- Archive boards you're not actively using
+- Access via Settings → "📦 Archive Board"
+- View all archived boards via header menu (⋮)
+- Restore or permanently delete archived boards
+- Archived boards don't appear in Task Feed
 
 **Dark Mode:**
 - Full dark theme for all UI components
@@ -222,9 +260,10 @@ The app automatically calculates and color-codes due dates:
 ## 🔮 Future Enhancement Ideas
 
 - [ ] Export/import boards as JSON files
+- [ ] Cloud sync options (Dropbox, Google Drive)
 - [ ] Card labels/tags with color coding
 - [ ] Filter and search functionality
-- [ ] Card archiving (hide completed)
+- [x] ~~Card archiving~~ Board archiving implemented
 - [ ] Card templates for common tasks
 - [ ] Markdown support in descriptions
 - [ ] Board templates (Scrum, GTD, etc.)
@@ -234,6 +273,7 @@ The app automatically calculates and color-codes due dates:
 - [ ] Card comments/notes
 - [ ] Time tracking per card
 - [ ] Board sharing (view-only links)
+- [x] ~~Task Feed view~~ Implemented
 
 ## 🤝 Contributing
 
