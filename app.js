@@ -13,7 +13,8 @@ let state = {
     currentBoardId: null,
     editingCard: null,
     draggedCard: null,
-    draggedColumn: null
+    draggedColumn: null,
+    currentView: 'board' // 'board' or 'taskFeed'
 };
 
 // DOM Elements
@@ -69,6 +70,10 @@ const viewArchivedBtn = document.getElementById('viewArchivedBtn');
 const archivedModal = document.getElementById('archivedModal');
 const archivedBoardsList = document.getElementById('archivedBoardsList');
 const closeArchivedBtn = document.getElementById('closeArchivedBtn');
+
+const taskFeedBtn = document.getElementById('taskFeedBtn');
+const taskFeedContainer = document.getElementById('taskFeedContainer');
+const taskFeedContent = document.getElementById('taskFeedContent');
 
 // Local Storage Functions
 function saveToLocalStorage() {
@@ -365,6 +370,176 @@ function deleteArchivedBoard(boardId) {
         saveToLocalStorage();
         renderArchivedBoards();
     }
+}
+
+// Task Feed Functions
+function getAllTasks() {
+    const tasks = [];
+    let totalTasks = 0;
+    let completedTasks = 0;
+
+    state.boards.forEach(board => {
+        if (board.archived) return; // Skip archived boards
+
+        const boardTasks = {
+            boardId: board.id,
+            boardName: board.name,
+            cards: []
+        };
+
+        board.columns.forEach(column => {
+            column.cards.forEach(card => {
+                if (card.checklist && card.checklist.length > 0) {
+                    const cardTasks = {
+                        cardId: card.id,
+                        cardTitle: card.title,
+                        columnId: column.id,
+                        columnName: column.name,
+                        checklist: card.checklist.map((item, index) => ({
+                            ...item,
+                            index
+                        }))
+                    };
+                    boardTasks.cards.push(cardTasks);
+
+                    // Count totals
+                    totalTasks += card.checklist.length;
+                    completedTasks += card.checklist.filter(item => item.checked).length;
+                }
+            });
+        });
+
+        if (boardTasks.cards.length > 0) {
+            tasks.push(boardTasks);
+        }
+    });
+
+    return {
+        tasks,
+        totalTasks,
+        completedTasks,
+        pendingTasks: totalTasks - completedTasks
+    };
+}
+
+function renderTaskFeed() {
+    const { tasks } = getAllTasks();
+
+    // Clear content
+    taskFeedContent.innerHTML = '';
+
+    if (tasks.length === 0) {
+        taskFeedContent.innerHTML = `
+            <div class="task-feed-empty">
+                <h4>No tasks yet</h4>
+                <p>Create checklist items in your cards to see them here</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Render tasks grouped by board and card
+    tasks.forEach(board => {
+        const boardSection = document.createElement('div');
+        boardSection.className = 'task-board-section';
+
+        const totalBoardTasks = board.cards.reduce((sum, card) => sum + card.checklist.length, 0);
+        const completedBoardTasks = board.cards.reduce((sum, card) => 
+            sum + card.checklist.filter(item => item.checked).length, 0);
+
+        boardSection.innerHTML = `
+            <div class="task-board-header">
+                <div class="task-board-name">${board.boardName}</div>
+                <div class="task-board-count">${completedBoardTasks}/${totalBoardTasks} tasks</div>
+            </div>
+        `;
+
+        board.cards.forEach(card => {
+            const cardSection = document.createElement('div');
+            cardSection.className = 'task-card-section';
+
+            const cardHeader = document.createElement('div');
+            cardHeader.className = 'task-card-header';
+            cardHeader.innerHTML = `
+                <span>${card.cardTitle}</span>
+                <span class="task-card-column">${card.columnName}</span>
+            `;
+            cardSection.appendChild(cardHeader);
+
+            card.checklist.forEach(item => {
+                const taskItem = document.createElement('div');
+                taskItem.className = 'task-item';
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = item.checked;
+                checkbox.dataset.boardId = board.boardId;
+                checkbox.dataset.columnId = card.columnId;
+                checkbox.dataset.cardId = card.cardId;
+                checkbox.dataset.itemIndex = item.index;
+
+                checkbox.addEventListener('change', (e) => {
+                    toggleTaskInFeed(
+                        board.boardId,
+                        card.columnId,
+                        card.cardId,
+                        item.index,
+                        e.target.checked
+                    );
+                });
+
+                const taskText = document.createElement('div');
+                taskText.className = `task-item-text ${item.checked ? 'completed' : ''}`;
+                taskText.textContent = item.text;
+
+                taskItem.appendChild(checkbox);
+                taskItem.appendChild(taskText);
+                cardSection.appendChild(taskItem);
+            });
+
+            boardSection.appendChild(cardSection);
+        });
+
+        taskFeedContent.appendChild(boardSection);
+    });
+}
+
+function toggleTaskInFeed(boardId, columnId, cardId, itemIndex, checked) {
+    const board = state.boards.find(b => b.id === boardId);
+    if (!board) return;
+
+    const column = board.columns.find(c => c.id === columnId);
+    if (!column) return;
+
+    const card = column.cards.find(c => c.id === cardId);
+    if (!card || !card.checklist || !card.checklist[itemIndex]) return;
+
+    // Update the checklist item
+    card.checklist[itemIndex].checked = checked;
+    saveToLocalStorage();
+
+    // Re-render task feed to update stats and styling
+    renderTaskFeed();
+
+    // Only update the board view if we're currently viewing boards (not task feed)
+    if (state.currentView === 'board' && state.currentBoardId === boardId) {
+        renderBoard();
+    }
+}
+
+function showTaskFeed() {
+    state.currentView = 'taskFeed';
+    emptyState.style.display = 'none';
+    boardContainer.style.display = 'none';
+    taskFeedContainer.style.display = 'flex';
+    boardSelector.value = ''; // Clear board selection
+    renderTaskFeed();
+}
+
+function showBoardView() {
+    state.currentView = 'board';
+    taskFeedContainer.style.display = 'none';
+    renderBoard();
 }
 
 function renderBoard() {
@@ -786,6 +961,7 @@ createBoardBtn.addEventListener('click', () => {
 boardSelector.addEventListener('change', (e) => {
     if (e.target.value) {
         selectBoard(e.target.value);
+        showBoardView();
     }
 });
 
@@ -884,6 +1060,9 @@ viewArchivedBtn.addEventListener('click', () => {
 closeArchivedBtn.addEventListener('click', () => {
     archivedModal.style.display = 'none';
 });
+
+// Task Feed View
+taskFeedBtn.addEventListener('click', showTaskFeed);
 
 // Close header menu when clicking outside
 document.addEventListener('click', (e) => {

@@ -20,6 +20,7 @@
                     <option value="">Select Board</option>
                 </select>
                 <button id="newBoardBtn" class="btn btn-primary">+ New Board</button>
+                <button id="taskFeedBtn" class="btn btn-primary">Task Feed</button>
                 <button id="headerMenuBtn" class="btn btn-icon">⋮</button>
             </div>
         </header>
@@ -45,6 +46,19 @@
                     </div>
                 </div>
                 <div id="columnsContainer" class="columns-container"></div>
+            </div>
+
+            <!-- Task Feed View -->
+            <div id="taskFeedContainer" class="task-feed-container" style="display: none;">
+                <div class="task-feed-page-header">
+                    <div class="task-feed-title-section">
+                        <h2>Task Feed</h2>
+                        <p class="task-feed-subtitle">All your checklist items in one place</p>
+                    </div>
+                </div>
+                <div id="taskFeedContent" class="task-feed-content">
+                    <!-- Tasks will be rendered here -->
+                </div>
             </div>
         </main>
     </div>
