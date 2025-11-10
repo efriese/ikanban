@@ -267,8 +267,10 @@ limitations under the License.
 
 ## 🙏 Acknowledgments
 
-- Built for Chromebook users who need a simple, offline-capable task manager
-- Inspired by Trello, but without the complexity or cloud dependency
+- Built for anyone who has data privacy concerns or lacks access to commercial Kanban systems
+- Perfect when IT won't approve a Trello license but you NEED a Kanban board
+- Works great on Chromebooks, desktops, tablets, and any modern browser
+- Inspired by Trello, but without the complexity, cost, or cloud dependency
 - No frameworks = fast, lightweight, and educational
 
 ## 📧 Support
