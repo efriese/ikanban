@@ -20,14 +20,14 @@
                     <option value="">Select Board</option>
                 </select>
                 <button id="newBoardBtn" class="btn btn-primary">+ New Board</button>
-                <button id="taskFeedBtn" class="btn btn-primary">Task Feed</button>
+                <button id="taskFeedBtn" class="btn btn-task-feed">Task Feed</button>
                 <button id="headerMenuBtn" class="btn btn-icon">⋮</button>
             </div>
         </header>
 
         <!-- Header Menu Dropdown -->
         <div id="headerMenu" class="dropdown-menu" style="display: none;">
-            <button id="viewArchivedBtn" class="dropdown-item">📦 View Archived Boards</button>
+            <button id="viewArchivedBtn" class="dropdown-item">View Archived Boards</button>
         </div>
 
         <!-- Main Content -->
@@ -42,8 +42,12 @@
                     <h2 id="boardTitle"></h2>
                     <div class="board-actions">
                         <button id="addColumnBtn" class="btn btn-secondary">+ Add Column</button>
-                        <button id="settingsBtn" class="btn btn-secondary">⚙ Settings</button>
+                        <button id="boardMenuBtn" class="btn btn-icon">⋮</button>
                     </div>
+                </div>
+                <div id="boardMenu" class="dropdown-menu board-dropdown-menu" style="display: none;">
+                    <button id="settingsBtn" class="dropdown-item">Settings</button>
+                    <button id="viewArchivedCardsBtn" class="dropdown-item">View Archived Cards</button>
                 </div>
                 <div id="columnsContainer" class="columns-container"></div>
             </div>
@@ -107,9 +111,24 @@
                 <button id="addChecklistItemBtn" class="btn-link">+ Add item</button>
             </div>
 
+            <label class="field-label">Links</label>
+            <div class="links-container">
+                <div id="linkItems"></div>
+                <div class="link-input-group">
+                    <input type="url" id="linkUrlInput" placeholder="https://example.com" class="input">
+                    <button id="addLinkBtn" class="btn-link">+ Add link</button>
+                </div>
+            </div>
+
             <div class="modal-actions">
-                <button id="cancelCardBtn" class="btn btn-secondary">Cancel</button>
-                <button id="saveCardBtn" class="btn btn-primary">Save</button>
+                <div class="modal-actions-left">
+                    <button id="archiveCardBtn" class="btn btn-secondary" style="display: none;">Archive Card</button>
+                    <button id="deleteCardBtn" class="btn btn-danger" style="display: none;">Delete Card</button>
+                </div>
+                <div class="modal-actions-right">
+                    <button id="cancelCardBtn" class="btn btn-secondary">Cancel</button>
+                    <button id="saveCardBtn" class="btn btn-primary">Save</button>
+                </div>
             </div>
         </div>
     </div>
@@ -199,6 +218,19 @@
             </div>
             <div class="modal-actions">
                 <button id="closeArchivedBtn" class="btn btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Archived Cards Modal -->
+    <div id="archivedCardsModal" class="modal">
+        <div class="modal-content archived-cards-modal">
+            <h3>Archived Cards</h3>
+            <div id="archivedCardsList" class="archived-cards-list">
+                <!-- Archived cards will be rendered here -->
+            </div>
+            <div class="modal-actions">
+                <button id="closeArchivedCardsBtn" class="btn btn-secondary">Close</button>
             </div>
         </div>
     </div>

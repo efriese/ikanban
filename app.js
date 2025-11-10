@@ -43,8 +43,13 @@ const cardDescInput = document.getElementById('cardDescInput');
 const cardDueDateInput = document.getElementById('cardDueDateInput');
 const checklistItems = document.getElementById('checklistItems');
 const addChecklistItemBtn = document.getElementById('addChecklistItemBtn');
+const linkItems = document.getElementById('linkItems');
+const linkUrlInput = document.getElementById('linkUrlInput');
+const addLinkBtn = document.getElementById('addLinkBtn');
 const saveCardBtn = document.getElementById('saveCardBtn');
 const cancelCardBtn = document.getElementById('cancelCardBtn');
+const archiveCardBtn = document.getElementById('archiveCardBtn');
+const deleteCardBtn = document.getElementById('deleteCardBtn');
 
 const backgroundModal = document.getElementById('backgroundModal');
 const bgColorInput = document.getElementById('bgColorInput');
@@ -64,12 +69,18 @@ const settingsArchiveBtn = document.getElementById('settingsArchiveBtn');
 const settingsDeleteBtn = document.getElementById('settingsDeleteBtn');
 const darkModeToggle = document.getElementById('darkModeToggle');
 
+const boardMenuBtn = document.getElementById('boardMenuBtn');
+const boardMenu = document.getElementById('boardMenu');
 const headerMenuBtn = document.getElementById('headerMenuBtn');
 const headerMenu = document.getElementById('headerMenu');
 const viewArchivedBtn = document.getElementById('viewArchivedBtn');
+const viewArchivedCardsBtn = document.getElementById('viewArchivedCardsBtn');
 const archivedModal = document.getElementById('archivedModal');
 const archivedBoardsList = document.getElementById('archivedBoardsList');
 const closeArchivedBtn = document.getElementById('closeArchivedBtn');
+const archivedCardsModal = document.getElementById('archivedCardsModal');
+const archivedCardsList = document.getElementById('archivedCardsList');
+const closeArchivedCardsBtn = document.getElementById('closeArchivedCardsBtn');
 
 const taskFeedBtn = document.getElementById('taskFeedBtn');
 const taskFeedContainer = document.getElementById('taskFeedContainer');
@@ -105,6 +116,19 @@ function formatCardHtml(card) {
     if (card.description) {
         const descText = card.description.replace(/<[^>]*>/g, '').substring(0, 100);
         html += `<div class="card-description">${descText}${descText.length >= 100 ? '...' : ''}</div>`;
+    }
+
+    // Add links if present
+    if (card.links && card.links.length > 0) {
+        html += '<div class="card-links">';
+        card.links.forEach(link => {
+            const displayTitle = link.title || new URL(link.url).hostname;
+            html += `<a href="${link.url}" target="_blank" rel="noopener noreferrer" class="card-link-tile" title="${link.url}" onclick="event.stopPropagation()">
+                <span class="card-link-icon">🔗</span>
+                <span class="card-link-text">${displayTitle}</span>
+            </a>`;
+        });
+        html += '</div>';
     }
 
     // Add metadata badges
@@ -252,7 +276,7 @@ function reorderColumns(fromIndex, toIndex) {
 }
 
 // Card Functions
-function createCard(columnId, title, description, dueDate, checklist) {
+function createCard(columnId, title, description, dueDate, checklist, links) {
     const board = getCurrentBoard();
     if (!board) return;
 
@@ -264,14 +288,16 @@ function createCard(columnId, title, description, dueDate, checklist) {
         title: title,
         description: description,
         dueDate: dueDate || null,
-        checklist: checklist || []
+        checklist: checklist || [],
+        links: links || [],
+        archived: false
     };
     column.cards.push(card);
     saveToLocalStorage();
     renderBoard();
 }
 
-function updateCard(columnId, cardId, title, description, dueDate, checklist) {
+function updateCard(columnId, cardId, title, description, dueDate, checklist, links) {
     const board = getCurrentBoard();
     if (!board) return;
 
@@ -285,6 +311,7 @@ function updateCard(columnId, cardId, title, description, dueDate, checklist) {
     card.description = description;
     card.dueDate = dueDate || null;
     card.checklist = checklist || [];
+    card.links = links || [];
     saveToLocalStorage();
     renderBoard();
 }
@@ -299,6 +326,78 @@ function deleteCard(columnId, cardId) {
     column.cards = column.cards.filter(c => c.id !== cardId);
     saveToLocalStorage();
     renderBoard();
+}
+
+function archiveCard(columnId, cardId) {
+    const board = getCurrentBoard();
+    if (!board) return;
+
+    const column = board.columns.find(c => c.id === columnId);
+    if (!column) return;
+
+    const card = column.cards.find(c => c.id === cardId);
+    if (!card) return;
+
+    card.archived = true;
+    saveToLocalStorage();
+    renderBoard();
+}
+
+function unarchiveCard(boardId, columnId, cardId) {
+    const board = state.boards.find(b => b.id === boardId);
+    if (!board) return;
+
+    const column = board.columns.find(c => c.id === columnId);
+    if (!column) return;
+
+    const card = column.cards.find(c => c.id === cardId);
+    if (!card) return;
+
+    card.archived = false;
+    saveToLocalStorage();
+    renderArchivedCards();
+    
+    // Refresh board view if we're viewing this board
+    if (state.currentBoardId === boardId && state.currentView === 'board') {
+        renderBoard();
+    }
+}
+
+function getAllArchivedCards() {
+    const archivedCards = [];
+    
+    state.boards.forEach(board => {
+        if (board.archived) return; // Skip archived boards
+        
+        board.columns.forEach(column => {
+            column.cards.forEach(card => {
+                if (card.archived) {
+                    archivedCards.push({
+                        boardId: board.id,
+                        boardName: board.name,
+                        columnId: column.id,
+                        columnName: column.name,
+                        cardId: card.id,
+                        card: card
+                    });
+                }
+            });
+        });
+    });
+    
+    return archivedCards;
+}
+
+function deleteArchivedCard(boardId, columnId, cardId) {
+    const board = state.boards.find(b => b.id === boardId);
+    if (!board) return;
+
+    const column = board.columns.find(c => c.id === columnId);
+    if (!column) return;
+
+    column.cards = column.cards.filter(c => c.id !== cardId);
+    saveToLocalStorage();
+    renderArchivedCards();
 }
 
 function moveCard(fromColumnId, toColumnId, cardId, targetIndex = null) {
@@ -370,6 +469,40 @@ function deleteArchivedBoard(boardId) {
         saveToLocalStorage();
         renderArchivedBoards();
     }
+}
+
+function renderArchivedCards() {
+    const archivedCards = getAllArchivedCards();
+
+    if (archivedCards.length === 0) {
+        archivedCardsList.innerHTML = '<div class="archived-cards-empty"><h4>No archived cards</h4><p>Archive cards to see them here</p></div>';
+        return;
+    }
+
+    archivedCardsList.innerHTML = '';
+    archivedCards.forEach(item => {
+        const cardEl = document.createElement('div');
+        cardEl.className = 'archived-card-item';
+        
+        const descText = item.card.description ? 
+            item.card.description.replace(/<[^>]*>/g, '').substring(0, 80) + '...' : '';
+        
+        cardEl.innerHTML = `
+            <div class="archived-card-header">
+                <div class="archived-card-title">${item.card.title}</div>
+            </div>
+            <div class="archived-card-meta">
+                <span class="archived-card-location">📋 ${item.boardName}</span>
+                <span class="archived-card-location">📍 ${item.columnName}</span>
+            </div>
+            ${descText ? `<div class="card-description" style="font-size: 0.875rem; color: #64748b; margin-bottom: 0.5rem;">${descText}</div>` : ''}
+            <div class="archived-card-actions">
+                <button class="btn btn-small btn-secondary" onclick="unarchiveCard('${item.boardId}', '${item.columnId}', '${item.cardId}')">Unarchive</button>
+                <button class="btn btn-small btn-danger" onclick="deleteArchivedCard('${item.boardId}', '${item.columnId}', '${item.cardId}')">Delete</button>
+            </div>
+        `;
+        archivedCardsList.appendChild(cardEl);
+    });
 }
 
 // Task Feed Functions
@@ -599,7 +732,7 @@ function renderBoard() {
                 </div>
             </div>
             <div class="cards-container" data-column-id="${column.id}">
-                ${column.cards.map(card => `
+                ${column.cards.filter(card => !card.archived).map(card => `
                     <div class="card" draggable="true" data-card-id="${card.id}" data-column-id="${column.id}">
                         ${formatCardHtml(card)}
                     </div>
@@ -885,6 +1018,54 @@ function getChecklistFromModal() {
     return items;
 }
 
+function renderLinkItems(links = []) {
+    linkItems.innerHTML = '';
+    links.forEach((link, index) => {
+        const linkEl = document.createElement('div');
+        linkEl.className = 'link-item';
+        const displayTitle = link.title || new URL(link.url).hostname;
+        linkEl.innerHTML = `
+            <span class="link-item-icon">🔗</span>
+            <div class="link-item-content">
+                <div class="link-item-title" data-index="${index}">${displayTitle}</div>
+                <input type="text" class="link-item-title-input" value="${displayTitle}" placeholder="Link title" data-index="${index}" style="display: none;">
+                <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="link-item-url">${link.url}</a>
+            </div>
+            <button class="link-item-edit" data-index="${index}">Edit</button>
+            <button class="link-item-delete" data-index="${index}">✕</button>
+        `;
+        linkItems.appendChild(linkEl);
+    });
+}
+
+function getLinksFromModal() {
+    const links = [];
+    linkItems.querySelectorAll('.link-item').forEach(linkEl => {
+        const urlLink = linkEl.querySelector('.link-item-url');
+        const url = urlLink.textContent;
+        const titleInput = linkEl.querySelector('.link-item-title-input');
+        const titleText = linkEl.querySelector('.link-item-title');
+        const title = titleInput && titleInput.style.display !== 'none' 
+            ? titleInput.value.trim() 
+            : (titleText ? titleText.textContent.trim() : '');
+        if (url) {
+            links.push({ url, title });
+        }
+    });
+    return links;
+}
+
+async function fetchLinkTitle(url) {
+    try {
+        // For cross-origin requests, we can't fetch the title directly
+        // Instead, we'll use the hostname as a fallback
+        const urlObj = new URL(url);
+        return urlObj.hostname;
+    } catch (error) {
+        return url;
+    }
+}
+
 function openCardModal(columnId) {
     state.editingCard = { columnId, cardId: null };
     cardModalTitle.textContent = 'Create New Card';
@@ -892,6 +1073,10 @@ function openCardModal(columnId) {
     cardDescInput.innerHTML = '';
     cardDueDateInput.value = '';
     renderChecklistItems([]);
+    renderLinkItems([]);
+    linkUrlInput.value = '';
+    archiveCardBtn.style.display = 'none';
+    deleteCardBtn.style.display = 'none';
     cardModal.classList.add('active');
     cardTitleInput.focus();
 }
@@ -907,6 +1092,10 @@ function openEditCardModal(columnId, cardId) {
     cardDescInput.innerHTML = card.description || '';
     cardDueDateInput.value = card.dueDate || '';
     renderChecklistItems(card.checklist || []);
+    renderLinkItems(card.links || []);
+    linkUrlInput.value = '';
+    archiveCardBtn.style.display = 'block';
+    deleteCardBtn.style.display = 'block';
     cardModal.classList.add('active');
     cardTitleInput.focus();
 }
@@ -981,12 +1170,13 @@ saveCardBtn.addEventListener('click', () => {
     const description = cardDescInput.innerHTML.trim();
     const dueDate = cardDueDateInput.value;
     const checklist = getChecklistFromModal();
+    const links = getLinksFromModal();
 
     if (title && state.editingCard) {
         if (state.editingCard.cardId) {
-            updateCard(state.editingCard.columnId, state.editingCard.cardId, title, description, dueDate, checklist);
+            updateCard(state.editingCard.columnId, state.editingCard.cardId, title, description, dueDate, checklist, links);
         } else {
-            createCard(state.editingCard.columnId, title, description, dueDate, checklist);
+            createCard(state.editingCard.columnId, title, description, dueDate, checklist, links);
         }
         closeCardModal();
     }
@@ -1005,6 +1195,75 @@ addChecklistItemBtn.addEventListener('click', () => {
     }
 });
 
+// Add link item button
+addLinkBtn.addEventListener('click', async () => {
+    const url = linkUrlInput.value.trim();
+    if (!url) return;
+
+    // Basic URL validation
+    if (!url.match(/^https?:\/\/.+/)) {
+        alert('Please enter a valid URL starting with http:// or https://');
+        return;
+    }
+
+    const currentLinks = getLinksFromModal();
+    const title = await fetchLinkTitle(url);
+    currentLinks.push({ url, title });
+    renderLinkItems(currentLinks);
+    linkUrlInput.value = '';
+});
+
+// Link item handlers (delegated)
+linkItems.addEventListener('click', (e) => {
+    if (e.target.classList.contains('link-item-delete')) {
+        const index = parseInt(e.target.dataset.index);
+        const currentLinks = getLinksFromModal();
+        currentLinks.splice(index, 1);
+        renderLinkItems(currentLinks);
+    }
+    
+    if (e.target.classList.contains('link-item-edit')) {
+        const index = parseInt(e.target.dataset.index);
+        const linkItem = e.target.closest('.link-item');
+        const titleText = linkItem.querySelector('.link-item-title');
+        const titleInput = linkItem.querySelector('.link-item-title-input');
+        const editBtn = e.target;
+        
+        if (titleInput.style.display === 'none') {
+            // Switch to edit mode
+            titleText.style.display = 'none';
+            titleInput.style.display = 'block';
+            titleInput.focus();
+            titleInput.select();
+            editBtn.textContent = 'Save';
+        } else {
+            // Switch to view mode
+            titleText.textContent = titleInput.value || new URL(linkItem.querySelector('.link-item-url').textContent).hostname;
+            titleText.style.display = 'block';
+            titleInput.style.display = 'none';
+            editBtn.textContent = 'Edit';
+        }
+    }
+});
+
+// Archive card button
+archiveCardBtn.addEventListener('click', () => {
+    if (state.editingCard && state.editingCard.cardId) {
+        archiveCard(state.editingCard.columnId, state.editingCard.cardId);
+        closeCardModal();
+    }
+});
+
+// Delete card button
+deleteCardBtn.addEventListener('click', () => {
+    if (state.editingCard && state.editingCard.cardId) {
+        if (confirm('Are you sure you want to permanently delete this card?')) {
+            deleteCard(state.editingCard.columnId, state.editingCard.cardId);
+            closeCardModal();
+        }
+    }
+});
+
 // Checklist item delete handler (delegated)
 checklistItems.addEventListener('click', (e) => {
     if (e.target.classList.contains('checklist-item-delete')) {
@@ -1017,6 +1276,7 @@ checklistItems.addEventListener('click', (e) => {
 
 // Settings Modal
 function openSettingsModal() {
+    boardMenu.style.display = 'none';
     settingsModal.classList.add('active');
 }
 
@@ -1045,6 +1305,12 @@ settingsDeleteBtn.addEventListener('click', () => {
     }
 });
 
+// Board Menu
+boardMenuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    boardMenu.style.display = boardMenu.style.display === 'none' ? 'block' : 'none';
+});
+
 // Header Menu
 headerMenuBtn.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -1057,17 +1323,30 @@ viewArchivedBtn.addEventListener('click', () => {
     archivedModal.style.display = 'flex';
 });
 
+viewArchivedCardsBtn.addEventListener('click', () => {
+    boardMenu.style.display = 'none';
+    renderArchivedCards();
+    archivedCardsModal.classList.add('active');
+});
+
 closeArchivedBtn.addEventListener('click', () => {
     archivedModal.style.display = 'none';
+});
+
+closeArchivedCardsBtn.addEventListener('click', () => {
+    archivedCardsModal.classList.remove('active');
 });
 
 // Task Feed View
 taskFeedBtn.addEventListener('click', showTaskFeed);
 
-// Close header menu when clicking outside
+// Close menus when clicking outside
 document.addEventListener('click', (e) => {
     if (!headerMenuBtn.contains(e.target) && !headerMenu.contains(e.target)) {
         headerMenu.style.display = 'none';
+    }
+    if (boardMenuBtn && !boardMenuBtn.contains(e.target) && !boardMenu.contains(e.target)) {
+        boardMenu.style.display = 'none';
     }
 });
 
@@ -1198,7 +1477,9 @@ document.addEventListener('keydown', (e) => {
         closeBackgroundModal();
         closeSettingsModal();
         archivedModal.style.display = 'none';
+        archivedCardsModal.classList.remove('active');
         headerMenu.style.display = 'none';
+        boardMenu.style.display = 'none';
         // Close column menus
         document.querySelectorAll('.column-menu').forEach(menu => {
             menu.style.display = 'none';
