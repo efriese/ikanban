@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1e293b">
+    <meta name="description" content="A simple PWA Kanban board for task management">
+    <title>iKanban - Task Board</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==">
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <h1>iKanban</h1>
+            <div class="header-actions">
+                <select id="boardSelector" class="board-selector">
+                    <option value="">Select Board</option>
+                </select>
+                <button id="newBoardBtn" class="btn btn-primary">+ New Board</button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div id="emptyState" class="empty-state">
+                <h2>Welcome to iKanban</h2>
+                <p>Create a new board to get started</p>
+            </div>
+
+            <div id="boardContainer" class="board-container" style="display: none;">
+                <div class="board-header">
+                    <h2 id="boardTitle"></h2>
+                    <div class="board-actions">
+                        <button id="addColumnBtn" class="btn btn-secondary">+ Add Column</button>
+                        <button id="settingsBtn" class="btn btn-secondary">⚙ Settings</button>
+                    </div>
+                </div>
+                <div id="columnsContainer" class="columns-container"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for New Board -->
+    <div id="boardModal" class="modal">
+        <div class="modal-content">
+            <h3>Create New Board</h3>
+            <input type="text" id="boardNameInput" placeholder="Board name" class="input">
+            <div class="modal-actions">
+                <button id="cancelBoardBtn" class="btn btn-secondary">Cancel</button>
+                <button id="createBoardBtn" class="btn btn-primary">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for New Column -->
+    <div id="columnModal" class="modal">
+        <div class="modal-content">
+            <h3>Create New Column</h3>
+            <input type="text" id="columnNameInput" placeholder="Column name" class="input">
+            <div class="modal-actions">
+                <button id="cancelColumnBtn" class="btn btn-secondary">Cancel</button>
+                <button id="createColumnBtn" class="btn btn-primary">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for New/Edit Card -->
+    <div id="cardModal" class="modal">
+        <div class="modal-content card-modal-large">
+            <h3 id="cardModalTitle">Create New Card</h3>
+
+            <label class="field-label">Title</label>
+            <input type="text" id="cardTitleInput" placeholder="Card title" class="input">
+
+            <label class="field-label">Description</label>
+            <div id="cardDescInput" contenteditable="true" class="rich-text-editor" data-placeholder="Add a description..."></div>
+
+            <label class="field-label">Due Date</label>
+            <input type="date" id="cardDueDateInput" class="input">
+
+            <label class="field-label">Checklist</label>
+            <div class="checklist-container">
+                <div id="checklistItems"></div>
+                <button id="addChecklistItemBtn" class="btn-link">+ Add item</button>
+            </div>
+
+            <div class="modal-actions">
+                <button id="cancelCardBtn" class="btn btn-secondary">Cancel</button>
+                <button id="saveCardBtn" class="btn btn-primary">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Background Settings -->
+    <div id="backgroundModal" class="modal">
+        <div class="modal-content">
+            <h3>Board Background</h3>
+            <div class="background-options">
+                <div class="background-type-selector">
+                    <label>
+                        <input type="radio" name="bgType" value="color" checked>
+                        Color
+                    </label>
+                    <label>
+                        <input type="radio" name="bgType" value="image">
+                        Image URL
+                    </label>
+                    <label>
+                        <input type="radio" name="bgType" value="file">
+                        Local File
+                    </label>
+                </div>
+                <div id="colorOption" class="background-option">
+                    <label>Choose a color:</label>
+                    <input type="color" id="bgColorInput" class="color-input" value="#f1f5f9">
+                </div>
+                <div id="imageOption" class="background-option" style="display: none;">
+                    <label>Enter image URL:</label>
+                    <input type="text" id="bgImageInput" placeholder="https://example.com/image.jpg" class="input">
+                </div>
+                <div id="fileOption" class="background-option" style="display: none;">
+                    <label>Choose an image file:</label>
+                    <input type="file" id="bgFileInput" accept="image/*" class="file-input">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button id="cancelBackgroundBtn" class="btn btn-secondary">Cancel</button>
+                <button id="saveBackgroundBtn" class="btn btn-primary">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <h3>Board Settings</h3>
+
+            <div class="settings-section">
+                <h4 class="settings-section-title">Appearance</h4>
+                <div class="settings-item">
+                    <label class="settings-label">
+                        <span>Dark Mode</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="darkModeToggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h4 class="settings-section-title">Board Options</h4>
+                <button id="settingsBackgroundBtn" class="settings-button">
+                    🎨 Change Background
+                </button>
+                <button id="settingsDeleteBtn" class="settings-button delete">
+                    🗑️ Delete Board
+                </button>
+            </div>
+
+            <div class="modal-actions">
+                <button id="closeSettingsBtn" class="btn btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
