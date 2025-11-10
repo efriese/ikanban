@@ -2,7 +2,7 @@
 
 A lightweight, feature-rich Kanban board Progressive Web App (PWA) designed to run seamlessly on Chromebooks and modern browsers. Built with vanilla JavaScript, HTML, and CSS - no frameworks required.
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
 ![PWA](https://img.shields.io/badge/PWA-enabled-green.svg)
 ![No Dependencies](https://img.shields.io/badge/dependencies-none-brightgreen.svg)
 
@@ -15,7 +15,6 @@ A lightweight, feature-rich Kanban board Progressive Web App (PWA) designed to r
   - Image URLs from the web
   - Local image files (automatically compressed)
 - **Local Storage** - All data persists locally in your browser (no server needed)
-- **Optional PWA** - Install as app with offline caching when using a web server
 
 ### 📊 Columns & Organization
 - **Flexible Columns** - Add unlimited columns to each board
@@ -56,53 +55,7 @@ A lightweight, feature-rich Kanban board Progressive Web App (PWA) designed to r
 2. Open `index.html` in your web browser
 3. Start creating boards!
 
-That's it! The app works fully without any server.
-
-**Note:** To install as a PWA or enable offline caching, you'll need a web server (see below).
-
-### Optional: Web Server for PWA Features
-
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/ikanban.git
-cd ikanban
-```
-
-2. Serve the files using any web server:
-
-**Python 3:**
-```bash
-python -m http.server
-```
-
-**Python 2:**
-```bash
-python -m SimpleHTTPServer
-```
-
-**Node.js (http-server):**
-```bash
-npx http-server
-```
-
-**PHP:**
-```bash
-php -S localhost:8000
-```
-
-3. Open your browser to `http://localhost:8000`
-
-### 📱 Installing as PWA (Optional)
-
-For the full PWA experience with offline caching (requires web server):
-
-1. Serve the app using one of the methods above
-2. Open it in Chrome, Edge, or another PWA-compatible browser
-3. Click the install icon (⊕) in the address bar
-4. Click "Install" in the popup
-5. The app will be installed and can be launched from your app drawer/start menu
-
-**Note:** Even without PWA installation, your data is saved locally and persists between sessions!
+That's it! The app works fully and all features are available.
 
 ## 🎯 How to Use
 
@@ -151,7 +104,6 @@ For the full PWA experience with offline caching (requires web server):
 
 ## 🛠️ Tech Stack
 
-**Core (works everywhere):**
 - **HTML5** - Semantic markup and modern web standards
 - **CSS3** - Flexbox, Grid, CSS Variables, smooth animations
 - **Vanilla JavaScript (ES6+)** - No frameworks or build tools
@@ -159,8 +111,6 @@ For the full PWA experience with offline caching (requires web server):
 - **Drag and Drop API** - Native browser drag and drop
 - **FileReader API** - Local image file handling
 - **Canvas API** - Image compression for local files
-
-**Optional (requires web server):**
 - **Service Worker** - Offline functionality and caching
 - **Progressive Web App** - Installable app with manifest
 
@@ -261,11 +211,6 @@ The app automatically calculates and color-codes due dates:
 - ✅ Safari 13+
 - ✅ Opera 67+
 
-**PWA Installation:**
-- ✅ Chrome/Edge on Windows, Mac, Linux, ChromeOS
-- ✅ Safari on iOS/iPadOS
-- ⚠️ Firefox (limited PWA support)
-
 ## 🐛 Known Limitations
 
 - Data is stored per browser/device (no cloud sync between devices)
@@ -302,30 +247,22 @@ Contributions are welcome! Here's how:
 
 ## 📝 License
 
-This project is licensed under the MIT License - see below for details.
+This project is licensed under the Apache License 2.0 - see below for details.
 
 ```
-MIT License
+Copyright 2025
 
-Copyright (c) 2025
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+    http://www.apache.org/licenses/LICENSE-2.0
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 ```
 
 ## 🙏 Acknowledgments
