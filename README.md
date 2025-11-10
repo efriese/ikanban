@@ -14,8 +14,8 @@ A lightweight, feature-rich Kanban board Progressive Web App (PWA) designed to r
   - Solid colors via color picker
   - Image URLs from the web
   - Local image files (automatically compressed)
-- **Offline Support** - Full PWA functionality with service worker caching
-- **Local Storage** - All data persists locally in your browser
+- **Local Storage** - All data persists locally in your browser (no server needed)
+- **Optional PWA** - Install as app with offline caching when using a web server
 
 ### 📊 Columns & Organization
 - **Flexible Columns** - Add unlimited columns to each board
@@ -50,15 +50,17 @@ A lightweight, feature-rich Kanban board Progressive Web App (PWA) designed to r
 
 ## 🚀 Getting Started
 
-### Quick Start (Local File)
+### Quick Start (Easiest)
 
 1. Download or clone the repository
 2. Open `index.html` in your web browser
 3. Start creating boards!
 
-**Note:** Some PWA features require a web server.
+That's it! The app works fully without any server.
 
-### Installation with Web Server
+**Note:** To install as a PWA or enable offline caching, you'll need a web server (see below).
+
+### Optional: Web Server for PWA Features
 
 1. Clone the repository:
 ```bash
@@ -90,16 +92,17 @@ php -S localhost:8000
 
 3. Open your browser to `http://localhost:8000`
 
-### 📱 Installing as PWA
+### 📱 Installing as PWA (Optional)
 
-For the full app experience on Chromebook or desktop:
+For the full PWA experience with offline caching (requires web server):
 
-1. Open the app in Chrome, Edge, or another PWA-compatible browser
-2. Click the install icon (⊕) in the address bar
-3. Click "Install" in the popup
-4. The app will be installed and can be launched from your app drawer/start menu
+1. Serve the app using one of the methods above
+2. Open it in Chrome, Edge, or another PWA-compatible browser
+3. Click the install icon (⊕) in the address bar
+4. Click "Install" in the popup
+5. The app will be installed and can be launched from your app drawer/start menu
 
-The PWA works offline once installed!
+**Note:** Even without PWA installation, your data is saved locally and persists between sessions!
 
 ## 🎯 How to Use
 
@@ -148,15 +151,18 @@ The PWA works offline once installed!
 
 ## 🛠️ Tech Stack
 
+**Core (works everywhere):**
 - **HTML5** - Semantic markup and modern web standards
 - **CSS3** - Flexbox, Grid, CSS Variables, smooth animations
 - **Vanilla JavaScript (ES6+)** - No frameworks or build tools
-- **Service Worker** - Offline functionality and caching
 - **LocalStorage API** - Client-side data persistence
-- **Progressive Web App** - Manifest, icons, and offline support
 - **Drag and Drop API** - Native browser drag and drop
 - **FileReader API** - Local image file handling
 - **Canvas API** - Image compression for local files
+
+**Optional (requires web server):**
+- **Service Worker** - Offline functionality and caching
+- **Progressive Web App** - Installable app with manifest
 
 ## 📂 Project Structure
 
